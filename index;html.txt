@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VerificaFato - Checagem de Notícias</title>
+    <style>
+        :root {
+            --fake-color: #e74c3c;
+            --fact-color: #2ecc71;
+            --dark-bg: #1e1e24;
+            --text-dark: #2c3e50;
+            --text-light: #555;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            max-width: 600px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--dark-bg);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        /* Container do Card que vira */
+        .flip-container {
+            background-color: transparent;
+            width: 100%;
+            max-width: 450px;
+            height: 550px;
+            perspective: 1000px; /* Ativa o efeito 3D */
+        }
+
+        /* O elemento que realmente vai girar */
+        .flipper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        /* Faz o card virar ao passar o mouse ou ao ser clicado (Mobile) */
+        .flip-container:hover .flipper, .flip-container.flipped .flipper {
+            transform: rotateY(180deg);
+        }
+
+        /* Configurações comuns para a Frente e o Verso */
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden; /* Suporte para navegadores antigos */
+            backface-visibility: hidden;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #e1e8ed;
+        }
+
+        /* Estilização do container da Imagem */
+        .card-image {
+            width: 100%;
+            height: 220px;
+            position: relative;
+            background-color: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-image svg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Conteúdo de Texto */
+        .card-content {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            text-align: left;
+            justify-content: space-between;
+        }
+
+        .tag {
+            align-self: flex-start;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            line-height: 1.3;
+            margin-bottom: 12px;
+        }
+
+        .description {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            line-height: 1.6;
+            flex-grow: 1;
+        }
+
+        .footer-note {
+            font-size: 0.8rem;
+            color: #999;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 12px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* --- Customização da Frente (FAKE) --- */
+        .front {
+            border-top: 8px solid var(--fake-color);
+        }
+
+        .front .tag {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--fake-color);
+            border: 1px solid var(--fake-color);
+        }
+
+        .front .title {
+            color: #c0392b;
+        }
+
+        /* --- Customização do Verso (FATO) --- */
+        .back {
+            border-top: 8px solid var(--fact-color);
+            transform: rotateY(180deg); /* Começa invertido */
+        }
+
+        .back .tag {
+            background-color: rgba(46, 204, 113, 0.1);
+            color: var(--fact-color);
+            border: 1px solid var(--fact-color);
+        }
+
+        .back .title {
+            color: #27ae60;
+        }
+
+        /* Mensagem de suporte */
+        .hint {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🔍 Fato ou Fake?</h1>
+        <p>Passe o mouse por cima do card (ou toque na tela) para virar e descobrir a verdade por trás da notícia.</p>
+    </header>
+
+    <div class="flip-container" onclick="this.classList.toggle('flipped');">
+        <div class="flipper">
+            
+            <div class="front">
+                <div class="card-image">
+                    <svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="100%" height="100%" fill="#0a1128"/>
+                        <rect x="20" y="120" width="50" height="100" fill="#1c2541"/>
+                        <rect x="90" y="80" width="70" height="140" fill="#1c2541"/>
+                        <rect x="180" y="140" width="60" height="80" fill="#1c2541"/>
+                        <rect x="260" y="100" width="80" height="120" fill="#1c2541"/>
+                        <rect x="110" y="100" width="10" height="15" fill="#f1c40f"/>
+                        <rect x="135" y="130" width="10" height="15" fill="#f1c40f"/>
+                        <rect x="290" y="120" width="10" height="15" fill="#f1c40f"/>
+                        <circle cx="200" cy="70" r="50" fill="#f39c12" filter="drop-shadow(0px 0px 20px #f1c40f)"/>
+                        <circle cx="200" cy="70" r="45" fill="#f1c40f"/>
+                        <path d="M200 10 L200 25 M200 115 L200 130 M140 70 L125 70 M260 70 L275 70" stroke="#f1c40f" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="card-content">
+                    <div>
+                        <span class="tag">🚨 Alerta de Rumor</span>
+                        <div class="title">Cientistas lançam "segunda lua" artificial para iluminar grandes cidades à noite</div>
+                        <div class="description">
+                            Imagens impressionantes que circulam na web mostram o sucesso do projeto aeroespacial que colocou em órbita um satélite espelhado gigante. Segundo posts, o objetivo é abolir os postes de luz e economizar energia global.
+                        </div>
+                    </div>
+                    <div class="footer-note">
+                        <span>💬 Compartilhado via WhatsApp</span>
+                        <span>⚠️ FAKE</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="back">
+                <div class="card-image">
+                    <svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="100%" height="100%" fill="#e8f8f5"/>
+                        <rect x="100" y="40" width="200" height="130" rx="10" fill="#34495e"/>
+                        <rect x="110" y="50" width="180" height="100" fill="#ecf0f1"/>
+                        <rect x="180" y="170" width="40" height="30" fill="#7f8c8d"/>
+                        <rect x="150" y="200" width="100" height="8" fill="#95a5a6"/>
+                        <circle cx="200" cy="95" r="30" fill="none" stroke="#2ecc71" stroke-width="6"/>
+                        <line x1="221" y1="116" x2="245" y2="140" stroke="#2ecc71" stroke-width="6" stroke-linecap="round"/>
+                        <path d="M185 95 L195 105 L215 85" fill="none" stroke="#2ecc71" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="card-content">
+                    <div>
+                        <span class="tag">✅ Fato Verificado</span>
+                        <div class="title">É FAKE: Imagem foi gerada por Inteligência Artificial; projetos reais foram cancelados</div>
+                        <div class="description">
+                            A foto que viralizou é uma arte digital de ficção criada por IA. Embora projetos reais de satélites refletores tenham sido cogitados no passado, nunca avançaram devido a gravíssimos riscos ambientais relacionados à perturbação do ecossistema noturno da fauna local.
+                        </div>
+                    </div>
+                    <div class="footer-note">
+                        <span>📰 Fonte: Agência Lupa / G1 Fato ou Fake</span>
+                        <span>✓ REAL</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="hint">💡 Dica: Se estiver no celular, basta dar um toque para girar!</div>
+
+</body>
+</html>
